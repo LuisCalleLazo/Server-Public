@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32-CAM Stream</title>
+    <style>
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>ESP32-CAM Stream</h1>
+    <img id="frame" src="" alt="ESP32-CAM Stream">
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        socket.on('frame', (filename) => {
+            document.getElementById('frame').src = `/uploads/${filename}`;
+        });
+    </script>
+</body>
+</html>
