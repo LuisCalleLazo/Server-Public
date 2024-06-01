@@ -1,36 +1,28 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const bodyParser = require('body-parser');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-const upload = multer({ dest: 'uploads/' });
+// Middleware para manejar cuerpos de solicitudes grandes
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Servir archivos del directorio 'uploads'
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-app.post('/upload', upload.single('frame'), (req, res) => {
-  if (req.file) {
-    const tempPath = req.file.path;
-    const targetPath = path.join(__dirname, 'uploads', `${Date.now()}-${req.file.originalname}`);
-
-    fs.rename(tempPath, targetPath, err => {
-      if (err) return res.status(500).send('Error al mover el archivo');
-
-      // Emitir el nombre del archivo a través de WebSocket
-      io.emit('frame', path.basename(targetPath));
-      res.status(200).send('File uploaded');
-    });
-  } else {
-    res.status(400).send('No file uploaded');
-  }
+app.post('/upload', (req, res) => {
+    const frame = req.body.frame;
+    if (frame) {
+        // Emitir la imagen a través de WebSocket
+        io.emit('frame', frame);
+        res.status(200).send('File uploaded');
+    } else {
+        res.status(400).send('No file uploaded');
+    }
 });
 
 io.on('connection', (socket) => {

@@ -17,8 +17,8 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        socket.on('frame', (filename) => {
-            document.getElementById('frame').src = `/uploads/${filename}`;
+        socket.on('frame', (data) => {
+            document.getElementById('frame').src = 'data:image/jpeg;base64,' + data;
         });
     </script>
 </body>
